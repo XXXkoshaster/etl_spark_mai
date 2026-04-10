@@ -1,2 +1,8 @@
 .env
 data
+.volumes
+docker
+spark-app/config.yaml
+error_clickhouse.log
+csv_data
+spark-data
