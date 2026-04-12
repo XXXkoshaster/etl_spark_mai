@@ -1,8 +1,8 @@
 .env
-data
-.volumes
-docker
+data/
+.volumes/
 spark-app/config.yaml
 error_clickhouse.log
-csv_data
-spark-data
+csv_data/
+spark-data/
+error_postgres.log

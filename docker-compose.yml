@@ -9,7 +9,7 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
-      - ./init_db/:/docker-entrypoint-initdb.d
+      - ./docker/postgres/init:/docker-entrypoint-initdb.d
       - ./data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
@@ -40,7 +40,7 @@ services:
   spark-master:
     build:
       context: .
-      dockerfile: Dockerfile.spark
+      dockerfile: docker/spark/Dockerfile
     image: local-spark:3.5.1
     container_name: spark-master
     command: /opt/spark/bin/spark-class org.apache.spark.deploy.master.Master
@@ -82,7 +82,9 @@ services:
       - spark-net
 
   jupyter:
-    build: .
+    build:
+      context: .
+      dockerfile: docker/jupyter/Dockerfile
     image: local-pyspark-351:latest
     container_name: jupyter
     depends_on:
