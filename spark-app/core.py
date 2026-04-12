@@ -77,6 +77,9 @@ class TableRegistry:
         return list(self._marts)
 
 class LoadStrategy(ABC):
+    def configure(self, builder):
+        return builder
+
     @abstractmethod
     def load(self, df: DataFrame, table_name: str, mode: str = "overwrite") -> None:
         ...
@@ -104,7 +107,30 @@ class PostgresStrategy(LoadStrategy):
         df.write.jdbc(url=self._url, table=table_name, mode=mode, properties=self._props)
 
 class ClickHouseStrategy(LoadStrategy):
-    pass
+    def __init__(self, ch_cfg: dict):
+        self._url = (
+            f"jdbc:ch://{ch_cfg['host']}:{ch_cfg['port']}"
+            f"/{ch_cfg['database']}"
+        )
+        self._props = {
+            "user": ch_cfg["user"],
+            "password": ch_cfg["password"],
+            "driver": ch_cfg["driver"],
+        }
+
+    def read(self, spark: SparkSession, table_name: str) -> DataFrame:
+        return spark.read.jdbc(url=self._url, table=table_name, properties=self._props)
+
+    def load(self, df: DataFrame, table_name: str, mode: str = "append") -> None:
+        df.write \
+            .format("jdbc") \
+            .option("url", self._url) \
+            .option("dbtable", table_name) \
+            .option("user", self._props["user"]) \
+            .option("password", self._props["password"]) \
+            .option("driver", self._props["driver"]) \
+            .mode(mode) \
+            .save()
 
 class ETLPipeline:
     def __init__(

@@ -131,7 +131,16 @@ class ProductQuality(MartCommand):
 def main():
     cfg = load_config()
 
-    spark = None
+    source = PostgresStrategy(cfg["postgres"])
+    target = ClickHouseStrategy(cfg["clickhouse"])
+
+    builder = (
+        SparkSession.builder
+        .master(cfg["spark"]["master"])
+        .appName(cfg["spark"]["app_name"])
+    )
+    
+    spark = builder.getOrCreate()
 
     registry = (
         TableRegistry()
@@ -146,8 +155,8 @@ def main():
     pipeline = MartPipeline(
         spark=spark,
         registry=registry,
-        source=PostgresStrategy(cfg["postgres"]),
-        target=ClickHouseStrategy(cfg["clickhouse"]),
+        source=source,
+        target=target,
         source_tables=[
             "fact_sales",
             "dim_customer",
