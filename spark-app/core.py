@@ -12,9 +12,13 @@ def load_config(path: str = "config.yaml") -> dict:
     with open(os.path.join(script_dir, path)) as f:
         cfg = yaml.safe_load(f)
 
-    cfg["postgres"]["database"] = os.environ["POSTGRES_DB"]
-    cfg["postgres"]["user"] = os.environ["POSTGRES_USER"]
-    cfg["postgres"]["password"] = os.environ["POSTGRES_PASSWORD"]
+    cfg["postgres_dds"]["database"] = os.environ["POSTGRES_DB"]
+    cfg["postgres_dds"]["user"] = os.environ["POSTGRES_USER"]
+    cfg["postgres_dds"]["password"] = os.environ["POSTGRES_PASSWORD"]
+
+    cfg["postgres_ods"]["database"] = os.environ.get("POSTGRES_ODS_DB", "ods")
+    cfg["postgres_ods"]["user"] = os.environ["POSTGRES_USER"]
+    cfg["postgres_ods"]["password"] = os.environ["POSTGRES_PASSWORD"]
 
     cfg["clickhouse"]["user"] = os.environ.get("CLICKHOUSE_USER", "default")
     cfg["clickhouse"]["password"] = os.environ.get("CLICKHOUSE_PASSWORD", "")
@@ -87,6 +91,27 @@ class LoadStrategy(ABC):
     @abstractmethod
     def read(self, spark: SparkSession, table_name: str) -> DataFrame:
         ...
+
+
+class CsvStrategy(LoadStrategy):
+    def __init__(self, base_path: str):
+        self._base_path = base_path
+
+    def read(self, spark: SparkSession, table_name: str) -> DataFrame:
+        return (
+            spark.read
+            .option("header", "true")
+            .option("inferSchema", "true")
+            .option("multiLine", "true")
+            .option("escape", '"')
+            .csv(self._base_path)
+        )
+
+    def load(self, df: DataFrame, table_name: str, mode: str = "overwrite") -> None:
+        df.write.csv(
+            f"{self._base_path}/{table_name}",
+            header=True, mode=mode,
+        )
 
 
 class PostgresStrategy(LoadStrategy):

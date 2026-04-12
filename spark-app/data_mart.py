@@ -131,7 +131,7 @@ class ProductQuality(MartCommand):
 def main():
     cfg = load_config()
 
-    source = PostgresStrategy(cfg["postgres"])
+    source = PostgresStrategy(cfg["postgres_dds"])
     target = ClickHouseStrategy(cfg["clickhouse"])
 
     builder = (

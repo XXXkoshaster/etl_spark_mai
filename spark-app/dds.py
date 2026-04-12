@@ -208,13 +208,14 @@ def main():
         .register(FactSales())
     )
 
-    pg = PostgresStrategy(cfg["postgres"])
+    source = PostgresStrategy(cfg["postgres_ods"])
+    target = PostgresStrategy(cfg["postgres_dds"])
 
     pipeline = ETLPipeline(
         spark=spark,
         registry=registry,
-        source=pg,
-        target=pg,
+        source=source,
+        target=target,
         source_table=cfg["etl"]["source_table"],
     )
 
