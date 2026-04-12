@@ -134,13 +134,12 @@ def main():
     source = PostgresStrategy(cfg["postgres_dds"])
     target = ClickHouseStrategy(cfg["clickhouse"])
 
-    builder = (
+    spark = (
         SparkSession.builder
         .master(cfg["spark"]["master"])
         .appName(cfg["spark"]["app_name"])
+        .getOrCreate()
     )
-    
-    spark = builder.getOrCreate()
 
     registry = (
         TableRegistry()

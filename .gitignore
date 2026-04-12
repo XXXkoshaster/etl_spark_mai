@@ -6,3 +6,4 @@ error_clickhouse.log
 csv_data/
 spark-data/
 error_postgres.log
+notebooks/.ipynb_checkpoints
