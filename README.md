@@ -4,7 +4,7 @@
 ### 1. Создайте файл `.env`
 
 ```env
-POSTGRES_DB=star
+POSTGRES_DB=postgres
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=postgres
 ```
